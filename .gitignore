@@ -1,0 +1,18 @@
+node_modules/
+dist/
+coverage/
+.env
+.env.*
+!.env.example
+.venv/
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+*.pyc
+*.pyo
+*.db
+.DS_Store
+.netlify/
+.neon/
+.superdesign/tmp/
+# Compact artifacts are retained deliberately for reproducible browser proving.

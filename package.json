@@ -1,0 +1,20 @@
+{
+  "name": "lumen-commons",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": ["frontend"],
+  "overrides": {
+    "motion-dom": "12.43.0",
+    "motion-utils": "12.39.0"
+  },
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "dev": "npm --workspace frontend run dev",
+    "build": "npm --workspace frontend run build",
+    "lint": "npm --workspace frontend run lint",
+    "test": "npm --workspace frontend run test",
+    "contract:validate": "node contract/scripts/validate-contract.mjs",
+    "contract:compile": "node contract/scripts/compile-contract.mjs",
+    "contract:verify-artifacts": "node contract/scripts/verify-artifacts.mjs"
+  }
+}
