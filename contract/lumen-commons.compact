@@ -1,0 +1,114 @@
+pragma language_version 0.23;
+import CompactStandardLibrary;
+
+// Private credential material is supplied by the holder's local private state.
+// It is never written to ledger state or returned from a circuit.
+export struct ResidentCredential {
+  district: Uint<16>;
+  age: Uint<8>;
+  holderSecret: Bytes<32>;
+}
+
+witness localResidentCredential(): ResidentCredential;
+witness localAdminSecret(): Bytes<32>;
+
+export enum ResponseCategory {
+  SUPPORT,
+  UNSURE,
+  CONCERN
+}
+
+// Public campaign policy and privacy-safe aggregate state.
+export sealed ledger campaignId: Bytes<32>;
+export sealed ledger requiredDistrict: Uint<16>;
+export sealed ledger minimumAge: Uint<8>;
+export sealed ledger adminCommitment: Bytes<32>;
+export ledger active: Boolean;
+export ledger usedNullifiers: Set<Bytes<32>>;
+export ledger supportCount: Counter;
+export ledger unsureCount: Counter;
+export ledger concernCount: Counter;
+export ledger responseCount: Counter;
+
+constructor(
+  publicCampaignId: Bytes<32>,
+  publicDistrict: Uint<16>,
+  publicMinimumAge: Uint<8>,
+  publicAdminCommitment: Bytes<32>
+) {
+  assert(publicMinimumAge > 0, "Minimum age must be positive");
+  campaignId = disclose(publicCampaignId);
+  requiredDistrict = disclose(publicDistrict);
+  minimumAge = disclose(publicMinimumAge);
+  adminCommitment = disclose(publicAdminCommitment);
+  active = true;
+}
+
+// Domain-separated identity: the same resident produces an unlinkable value in
+// every campaign, while the same campaign rejects a second submission.
+export pure circuit deriveNullifier(
+  secret: Bytes<32>,
+  publicCampaignId: Bytes<32>
+): Bytes<32> {
+  return persistentHash<Vector<3, Bytes<32>>>([
+    pad(32, "lumen:resident:v1"),
+    publicCampaignId,
+    secret
+  ]);
+}
+
+// Lets the browser derive the public constructor commitment locally. The
+// admin secret remains private and is retained only by the local private-state
+// provider created for the worker's deployment.
+export pure circuit deriveAdminCommitment(secret: Bytes<32>): Bytes<32> {
+  return persistentHash<Vector<2, Bytes<32>>>([
+    pad(32, "lumen:admin:v1"),
+    secret
+  ]);
+}
+
+// Proves eligibility and uniqueness. Only the chosen category and truth of the
+// two policy checks cross the privacy boundary; district, age, and holder secret
+// remain private.
+export circuit submitResponse(category: ResponseCategory): [] {
+  assert(active, "Campaign is closed");
+
+  const credential = localResidentCredential();
+  assert(
+    disclose(credential.district == requiredDistrict),
+    "Credential is for a different district"
+  );
+  assert(
+    disclose(credential.age >= minimumAge),
+    "Resident does not meet the public age rule"
+  );
+
+  const nullifier = deriveNullifier(credential.holderSecret, campaignId);
+  // Deliberate disclosure: the domain-separated hash is public so the ledger
+  // can reject a second response. It reveals neither the holder secret nor a
+  // reusable identity and is unlinkable across campaign IDs.
+  const publicNullifier = disclose(nullifier);
+  assert(!usedNullifiers.member(publicNullifier), "A response already exists");
+  usedNullifiers.insert(publicNullifier);
+
+  // Deliberate disclosure: category is the only response field included in the
+  // public aggregate. Free-form notes never enter the circuit.
+  const publicCategory = disclose(category);
+  if (publicCategory == ResponseCategory.SUPPORT) {
+    supportCount.increment(1);
+  } else if (publicCategory == ResponseCategory.UNSURE) {
+    unsureCount.increment(1);
+  } else {
+    concernCount.increment(1);
+  }
+  responseCount.increment(1);
+}
+
+// A private admin preimage authorizes closing; only the true authorization
+// result becomes public through the ledger update.
+export circuit closeCampaign(): [] {
+  const secret = localAdminSecret();
+  const derived = deriveAdminCommitment(secret);
+  assert(disclose(derived == adminCommitment), "Admin proof required");
+  active = false;
+}
