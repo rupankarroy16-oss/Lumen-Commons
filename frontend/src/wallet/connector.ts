@@ -8,21 +8,35 @@ export type InitialWalletApi = InitialAPI
 
 export interface DiscoveredWallet extends InitialWalletApi {
   id: string
-  preferred: boolean
 }
 
 const UUID_V4 = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+const ONE_AM_NAME = /(?:^|\s)1\s*am(?:\s+wallet)?(?:$|\s)/i
+const ONE_AM_RDNS = /(?:^|[._-])(?:1am|oneam)(?:[._-]|$)/i
+
+function isOneAmProvider(api: InitialWalletApi): boolean {
+  return (
+    api.apiVersion.split('.')[0] === '4'
+    && (ONE_AM_NAME.test(api.name.trim()) || ONE_AM_RDNS.test(api.rdns ?? ''))
+  )
+}
 
 export function discoverWallets(target: Window = window): DiscoveredWallet[] {
   const registry = target.midnight ?? {}
   return Object.entries(registry)
-    .filter(([id, api]) => UUID_V4.test(id) && api && typeof api.connect === 'function')
+    .filter(
+      ([id, api]) => (
+        UUID_V4.test(id)
+        && api
+        && typeof api.connect === 'function'
+        && isOneAmProvider(api)
+      ),
+    )
     .map(([id, api]) => ({
       ...api,
       id,
-      preferred: /(?:^|\.)1am(?:\.|$)/i.test(api.rdns ?? '') || /1am/i.test(api.name),
     }))
-    .sort((a, b) => Number(b.preferred) - Number(a.preferred) || a.name.localeCompare(b.name))
+    .sort((a, b) => a.name.localeCompare(b.name))
 }
 
 export type WalletErrorKind = 'rejected' | 'insufficient-dust' | 'proving-service' | 'indexer' | 'network' | 'unknown'
