@@ -70,6 +70,8 @@ h1 em { color: var(--blue); font-style: normal; font-weight: 400; }
 .primary-button, .secondary-button { min-height: 46px; border-radius: 9px; display: inline-flex; align-items: center; justify-content: center; gap: 10px; padding: 0 18px; font-weight: 700; cursor: pointer; transition: transform .18s ease, background .18s ease; }
 .primary-button { border: 1px solid var(--ink); background: var(--ink); color: var(--white); }
 .primary-button:is(a) { text-decoration: none; }
+.wallet-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
+.wallet-actions .primary-button, .wallet-actions .secondary-button { margin-top: 0; }
 .primary-button:hover { transform: translateY(-1px); background: #254740; }
 .primary-button:disabled { opacity: .55; cursor: not-allowed; transform: none; }
 .consultation-card > .primary-button { width: 100%; }

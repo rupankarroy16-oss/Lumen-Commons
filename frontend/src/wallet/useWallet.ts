@@ -22,8 +22,17 @@ export function useWallet(network: Network) {
   const refresh = useCallback(() => setWallets(discoverWallets()), [])
   useEffect(() => {
     refresh()
-    window.addEventListener('midnight#ready', refresh)
-    return () => window.removeEventListener('midnight#ready', refresh)
+    const detectionTimer = window.setInterval(refresh, 500)
+    const stopDetection = window.setTimeout(() => window.clearInterval(detectionTimer), 15_000)
+    const readyEvents = ['midnight#ready', 'midnight:ready', '1am#ready', '1am:ready'] as const
+    readyEvents.forEach((event) => window.addEventListener(event, refresh))
+    window.addEventListener('focus', refresh)
+    return () => {
+      window.clearInterval(detectionTimer)
+      window.clearTimeout(stopDetection)
+      readyEvents.forEach((event) => window.removeEventListener(event, refresh))
+      window.removeEventListener('focus', refresh)
+    }
   }, [refresh])
 
   const disconnect = useCallback(() => {

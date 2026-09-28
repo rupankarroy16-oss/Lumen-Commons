@@ -10,7 +10,6 @@ export interface DiscoveredWallet extends InitialWalletApi {
   id: string
 }
 
-const UUID_V4 = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
 const ONE_AM_NAME = /(?:^|\s)1\s*am(?:\s+wallet)?(?:$|\s)/i
 const ONE_AM_RDNS = /(?:^|[._-])(?:1am|oneam)(?:[._-]|$)/i
 
@@ -25,9 +24,8 @@ export function discoverWallets(target: Window = window): DiscoveredWallet[] {
   const registry = target.midnight ?? {}
   return Object.entries(registry)
     .filter(
-      ([id, api]) => (
-        UUID_V4.test(id)
-        && api
+      ([, api]) => (
+        api
         && typeof api.connect === 'function'
         && isOneAmProvider(api)
       ),

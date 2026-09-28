@@ -2,19 +2,18 @@ import { describe, expect, it, vi } from 'vitest'
 import { classifyWalletError, connectWallet, discoverWallets, type DiscoveredWallet } from './connector'
 
 const uuid1 = '550e8400-e29b-41d4-a716-446655440000'
-const uuid2 = '123e4567-e89b-42d3-a456-426614174000'
 
 describe('wallet connector', () => {
-  it('discovers only UUID-keyed 1AM DApp Connector v4 providers', () => {
+  it('discovers only 1AM DApp Connector v4 providers without assuming the registry key format', () => {
     const connect = vi.fn()
     window.midnight = {
       ignored: { name: 'Spoof', rdns: 'test.spoof', icon: '', apiVersion: '4.0.1', connect },
       [uuid1]: { name: 'Lace Midnight', rdns: 'io.lace.midnight', icon: '', apiVersion: '4.0.1', connect },
-      [uuid2]: { name: '1AM Wallet', rdns: 'xyz.1am.wallet', icon: '', apiVersion: '4.0.1', connect },
+      'one-am-provider': { name: '1AM Wallet', rdns: 'xyz.1am.wallet', icon: '', apiVersion: '4.0.1', connect },
     }
     const wallets = discoverWallets()
     expect(wallets).toHaveLength(1)
-    expect(wallets[0]).toMatchObject({ id: uuid2, name: '1AM Wallet' })
+    expect(wallets[0]).toMatchObject({ id: 'one-am-provider', name: '1AM Wallet' })
   })
 
   it('does not expose Lace when 1AM is unavailable', () => {
