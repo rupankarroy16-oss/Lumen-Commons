@@ -1,0 +1,43 @@
+[project]
+name = "lumen-commons-api"
+version = "1.0.0"
+description = "Privacy-bounded public metadata API for Lumen Commons"
+requires-python = ">=3.11"
+dependencies = [
+  "aiosqlite==0.21.0",
+  "alembic==1.15.2",
+  "asyncpg==0.30.0",
+  "fastapi==0.115.12",
+  "google-genai==1.20.0",
+  "pydantic==2.11.5",
+  "pydantic-settings==2.9.1",
+  "sqlalchemy[asyncio]==2.0.41",
+  "uvicorn[standard]==0.34.3"
+]
+
+[project.optional-dependencies]
+dev = [
+  "httpx==0.28.1",
+  "pytest==8.4.0",
+  "pytest-asyncio==1.0.0",
+  "ruff==0.11.13"
+]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "ASYNC"]
+ignore = ["B008"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["app"]
