@@ -6,7 +6,7 @@ Each participant owns their deployment. The browser connects to 1AM, deploys a f
 
 ## Participation flow
 
-1. Read the public campaign requirements.
+1. Read the public campaign requirents.
 2. Save eligibility information locally on the device.
 3. Review what remains private and what becomes public.
 4. Connect a 1AM wallet on Midnight Preview or Preprod.
