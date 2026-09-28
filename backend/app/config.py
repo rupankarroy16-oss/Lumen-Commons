@@ -1,7 +1,9 @@
 from functools import lru_cache
+from typing import Annotated
+from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
 from pydantic import Field, field_validator
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic_settings import BaseSettings, NoDecode, SettingsConfigDict
 
 
 class Settings(BaseSettings):
@@ -13,7 +15,9 @@ class Settings(BaseSettings):
     app_name: str = "Lumen Commons API"
     database_url: str = "sqlite+aiosqlite:///./lumen_commons.db"
     database_url_unpooled: str | None = None
-    api_cors_origins: list[str] = Field(default_factory=lambda: ["http://localhost:5173"])
+    api_cors_origins: Annotated[list[str], NoDecode] = Field(
+        default_factory=lambda: ["http://localhost:5173"]
+    )
     gemini_api_key: str | None = None
     gemini_model: str = "gemini-2.5-flash"
     store_raw_public_requirements: bool = False
@@ -35,7 +39,18 @@ class Settings(BaseSettings):
             normalized = normalized.replace("postgres://", "postgresql+asyncpg://", 1)
         elif normalized.startswith("postgresql://"):
             normalized = normalized.replace("postgresql://", "postgresql+asyncpg://", 1)
-        return normalized.replace("sslmode=require", "ssl=require")
+        if not normalized.startswith("postgresql+asyncpg://"):
+            return normalized
+
+        parts = urlsplit(normalized)
+        query: list[tuple[str, str]] = []
+        for key, item in parse_qsl(parts.query, keep_blank_values=True):
+            if key == "channel_binding":
+                continue
+            query.append(("ssl" if key == "sslmode" else key, item))
+        return urlunsplit(
+            (parts.scheme, parts.netloc, parts.path, urlencode(query), parts.fragment)
+        )
 
     @property
     def is_production(self) -> bool:

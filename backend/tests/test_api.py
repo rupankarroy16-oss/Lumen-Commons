@@ -12,6 +12,50 @@ from app.privacy import redact_sensitive_text
 from app.schemas import ProofReceiptCreate
 
 
+def test_api_cors_origins_accepts_render_plain_url(monkeypatch):
+    monkeypatch.setenv("API_CORS_ORIGINS", "https://lumen-commons.netlify.app")
+
+    settings = Settings()
+
+    assert settings.api_cors_origins == ["https://lumen-commons.netlify.app"]
+
+
+def test_api_cors_origins_accepts_comma_separated_urls(monkeypatch):
+    monkeypatch.setenv(
+        "API_CORS_ORIGINS",
+        "https://lumen-commons.netlify.app, https://www.lumen-commons.example",
+    )
+
+    settings = Settings()
+
+    assert settings.api_cors_origins == [
+        "https://lumen-commons.netlify.app",
+        "https://www.lumen-commons.example",
+    ]
+
+
+def test_neon_urls_are_normalized_for_asyncpg():
+    settings = Settings(
+        database_url=(
+            "postgresql://resident:secret@ep-example-pooler.aws.neon.tech/neondb"
+            "?sslmode=require&channel_binding=require"
+        ),
+        database_url_unpooled=(
+            "postgresql://resident:secret@ep-example.aws.neon.tech/neondb"
+            "?sslmode=require&channel_binding=require"
+        ),
+    )
+
+    assert settings.database_url == (
+        "postgresql+asyncpg://resident:secret@ep-example-pooler.aws.neon.tech/neondb"
+        "?ssl=require"
+    )
+    assert settings.database_url_unpooled == (
+        "postgresql+asyncpg://resident:secret@ep-example.aws.neon.tech/neondb"
+        "?ssl=require"
+    )
+
+
 async def test_health_endpoint(client):
     response = await client.get("/health")
     assert response.status_code == 200
