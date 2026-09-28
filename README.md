@@ -4,9 +4,67 @@ Lumen Commons is a privacy-first civic participation application built on Midnig
 
 Each participant owns their deployment. The browser connects to 1AM, deploys a fresh worker contract through the participant's wallet, waits for finalization, and retains the resulting contract address and deployment transaction hash for that wallet and network.
 
+## Live Website URL
+
+[https://lumenbaby12.netlify.app/](https://lumenbaby12.netlify.app/)
+
+## Demo Video of App
+
+[Watch the Lumen Commons app demo on Google Drive](https://drive.google.com/file/d/1r_DyKeF-_f-PElyzri9xGGNl1NOEzSM_/view?usp=sharing)
+
+## Preprod
+
+| Field | Verified public value |
+| --- | --- |
+| Network | Midnight Preprod |
+| Status | `SUCCESS` |
+| Contract address | `9f33142fe5be427f6261c1382241c4602ad5514e39efa3bfb6935457dac4e91d` |
+| Deployment transaction hash | [`aa8153d23650069bcea22e8051542b0368ba7bc1ecb978d685e76656774bcb54`](https://explorer.1am.xyz/tx/aa8153d23650069bcea22e8051542b0368ba7bc1ecb978d685e76656774bcb54?network=preprod) |
+| Block height | `2750825` |
+
+The transaction and deployed contract address were verified against the public Midnight Preprod indexer.
+
+## Preview
+
+| Field | Verified public value |
+| --- | --- |
+| Network | Midnight Preview |
+| Status | `SUCCESS` |
+| Contract address | `e4cd746b86dc2457289764f8b36fb3c21a5238d6b66ed68572eeeb11f83e9068` |
+| Deployment transaction hash | [`adafe0931eb67a50c8d7db36f3d2285a2fd337aefd2ec8b4d335ee5de593c0ba`](https://explorer.1am.xyz/tx/adafe0931eb67a50c8d7db36f3d2285a2fd337aefd2ec8b4d335ee5de593c0ba?network=preview) |
+| Block height | `1067623` |
+
+The transaction and deployed contract address were verified against the public Midnight Preview indexer.
+
+## Live Website Screenshot
+
+### Consultation landing page
+
+![Lumen Commons desktop consultation landing page](docs/screenshots/live-consultation.png)
+
+### Finalized Preprod receipt
+
+![Lumen Commons finalized Midnight Preprod receipt](docs/screenshots/live-finalized-receipt.png)
+
+### Privacy-safe public-policy assistant
+
+![Lumen Commons privacy-safe public-policy assistant](docs/screenshots/live-privacy-assistant.png)
+
+## Mobile Responsive UI
+
+| Consultation | Guided response | Privacy boundary |
+| --- | --- | --- |
+| <img src="docs/screenshots/mobile-consultation.jpg" alt="Mobile consultation landing page" width="280"> | <img src="docs/screenshots/mobile-guided-response.jpg" alt="Mobile guided private response" width="280"> | <img src="docs/screenshots/mobile-privacy-boundary.jpg" alt="Mobile privacy boundary" width="280"> |
+
+## Test Pass Screenshot
+
+Fresh Vitest verification: 5 test files and 14 tests passed.
+
+![Passing Lumen Commons Vitest suite](docs/screenshots/test-results.png)
+
 ## Participation flow
 
-1. Read the public campaign requirents.
+1. Read the public campaign requirements.
 2. Save eligibility information locally on the device.
 3. Review what remains private and what becomes public.
 4. Connect a 1AM wallet on Midnight Preview or Preprod.
@@ -44,7 +102,7 @@ The backend receives public receipts and aggregate counts. It does not need the 
 | Wallet | 1AM connector API | User approval, transaction balancing and submission |
 | Contract | Midnight Compact | Eligibility proof, campaign response and private administration |
 | Backend | FastAPI, SQLAlchemy, Alembic | Public campaigns, disclosure plans, receipts and aggregates |
-| Database | SQLite locally, PostgreSQL in production | Public application records |
+| Database | SQLite locally, Neon PostgreSQL in production | Public application records |
 | Hosting | Netlify and Render | Static frontend and API service |
 
 ## Requirements
